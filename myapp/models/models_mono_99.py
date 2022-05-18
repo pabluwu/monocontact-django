@@ -752,6 +752,7 @@ class UserRole(models.Model):
     class Meta:
         managed = False
         db_table = 'user_role'
+        
 
 
 class UserRoleArea(models.Model):

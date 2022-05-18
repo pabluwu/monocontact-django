@@ -1,9 +1,9 @@
 from rest_framework import serializers
 from dynamic_db_router import in_database
-from django.db import connections
-from myapp.connection import connection_db, select_db
+from myapp.connection import connection_db
+from .models.models_mono_base import User
 
-from .models.models_mono_99 import Contact
+from .models.models_mono_99 import Contact, Event, UserRole, AccountUser
 
 db_name = connection_db(99)
 
@@ -11,12 +11,6 @@ class ContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contact
         fields = '__all__'
-        # fields = 'code', 'email', 'firstname', 'lastname', 'company', 'title', 'phone', 'address', 'city', 'region', 'country'
-
-    # def validate(self, data):
-    #     if data.get('account_id', None) == None:
-    #         data['account_id']=99
-    #     return data
 
     def create(self, validated_data):
         contact = validated_data
@@ -43,5 +37,36 @@ class Contact_Update_Serializer(serializers.ModelSerializer):
             instance.save(using=db_name)
         return instance
 
+class Event_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Event
+        fields = '__all__'
 
+    def create(self, validated_data):
+        event = validated_data
+            
+        return Event.objects.using(db_name).create(**validated_data)  
+
+
+
+##Serializador User Role
+class User_Role_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserRole
+        fields = 'overseer', 'crm', 'area_id'
+
+class User_Serializer(serializers.ModelSerializer):
+    # user_role = User_Role_Serializer()
+    class Meta:
+        model = User
+        fields = '__all__'
+
+class User_Filter_Serializer(serializers.ModelSerializer):
+
+    class Meta:
+        overseer = serializers.PrimaryKeyRelatedField(queryset=AccountUser.objects.all())
+
+        model = User
+        fields = '__all__'
+    
  

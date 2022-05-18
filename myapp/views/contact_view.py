@@ -1,18 +1,11 @@
-import code
-from queue import Empty
-from django import db
-from requests import request
 from rest_framework.response import Response
-from django.http import HttpResponse
 from rest_framework.views import APIView
-from rest_framework import generics
 from rest_framework.decorators import api_view
 
 from dynamic_db_router import in_database
-from yaml import serialize
 from myapp.connection import connection_db, select_db
 
-from myapp.models.models_mono_99 import Contact, ContactTag
+from myapp.models.models_mono_99 import Contact
 from myapp.serializers import ContactSerializer, Contact_Update_Serializer
 from django.db import connections
 
