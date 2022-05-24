@@ -1,11 +1,11 @@
+from typing import List
 from rest_framework import serializers
 from dynamic_db_router import in_database
-from myapp.connection import connection_db
 from .models.models_mono_base import User
 
-from .models.models_mono_99 import Contact, Event, UserRole, AccountUser
+from .models.models_mono_99 import Contact, Event, UserRole, AccountUser, Listing
 
-db_name = connection_db(99)
+
 
 class ContactSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,7 +15,7 @@ class ContactSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         contact = validated_data
                 
-        return Contact.objects.using(db_name).create(**validated_data)
+        return Contact.objects.create(**validated_data)
 
 class Contact_Update_Serializer(serializers.ModelSerializer):
     class Meta:
@@ -33,9 +33,18 @@ class Contact_Update_Serializer(serializers.ModelSerializer):
         instance.city = validated_data.get('city', instance.city)
         instance.region = validated_data.get('region', instance.region)
         instance.country = validated_data.get('country', instance.country)
-        with in_database(db_name):
-            instance.save(using=db_name)
+        
+        instance.save()
         return instance
+
+class ListingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Listing
+        fields = '__all__'
+    
+    def create(self, validated_data):
+        listing  = validated_data
+        return Listing.objects.create(**validated_data)
 
 class Event_Serializer(serializers.ModelSerializer):
     class Meta:
@@ -45,7 +54,7 @@ class Event_Serializer(serializers.ModelSerializer):
     def create(self, validated_data):
         event = validated_data
             
-        return Event.objects.using(db_name).create(**validated_data)  
+        return Event.objects.create(**validated_data)  
 
 
 

@@ -46,6 +46,7 @@ INSTALLED_APPS = [
 
 
 MIDDLEWARE = [
+    'myapp.middleware.RoutingMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -107,7 +108,7 @@ DATABASES = {
     },
 }
 
-DATABASE_ROUTERS = ['dynamic_db_router.DynamicDbRouter']
+DATABASE_ROUTERS = ['myapp.middleware.DatabaseRouter',]
 
 
 # Password validation

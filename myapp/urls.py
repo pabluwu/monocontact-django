@@ -1,5 +1,7 @@
 from django.urls import URLPattern, path, include
-from myapp.views.contact_view import contact_api_view, contact_detail_api_view, contact_create_api_view, Contact_Filter_APIView
+from myapp.views.contact_view import (contact_api_view, contact_detail_api_view, 
+contact_create_api_view, Contact_Filter_APIView)
+from myapp.views.listing_view import listing_api_view
 from myapp.views.event_view import event_api_view
 from myapp.views.user_role_view import user_api_view, User_Filter_APIView
 
@@ -12,6 +14,7 @@ urlpatterns = [
 
     path('event/list', event_api_view, name='list_events'),
 
+    path('listing/list', listing_api_view, name='list_listing'),
 
     path('user/<int:pk>', user_api_view, name='list_users'),
     path('user/filter/',User_Filter_APIView.as_view(), name='user_filtes'),  

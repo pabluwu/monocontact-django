@@ -2,22 +2,24 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 
-from dynamic_db_router import in_database
-from myapp.connection import connection_db, select_db
+# from myapp.connection import connection_db, select_db
 
 from myapp.models.models_mono_99 import Contact
 from myapp.serializers import ContactSerializer, Contact_Update_Serializer
-from django.db import connections
 
 # db = select_db(10)
-db_name = connection_db(99)
+# db_name = connection_db(99)
 
 @api_view(['GET'])
 def contact_api_view(request):
     #Listar todos los contactos.
     if request.method == 'GET':
-        contacts = Contact.objects.using(db_name).all()
+        # contacts = Contact.objects.using(db_name).all()
+        contacts = Contact.objects.get_all_contacts()
         contacts_serializer = ContactSerializer(contacts, many=True)
+        print(request.META.get('HTTP_AUTHORIZATION', ''))
+        print(request.META.get('HTTP_TEST')) ##Para obtener los headers
+        
         return Response(contacts_serializer.data)   
 
     
@@ -27,10 +29,10 @@ def contact_create_api_view(request):
     ##Crear contacto a través de post.
     if request.method == 'POST':
         contact_serializer = ContactSerializer(data = request.data)
-        with in_database(db_name):
-            if contact_serializer.is_valid():
-                contact_serializer.save()
-                return Response(contact_serializer.data)
+        # with in_database(db_name):
+        if contact_serializer.is_valid():
+            contact_serializer.save()
+            return Response(contact_serializer.data)
         return Response(contact_serializer.errors)
 
     
@@ -38,7 +40,7 @@ def contact_create_api_view(request):
 
 @api_view(['GET', 'PUT', 'DELETE'])
 def contact_detail_api_view(request, pk=None):
-    contact = Contact.objects.using(db_name).filter(pk=pk).first()
+    contact = Contact.objects.get_contact(pk=pk).first()
 
     #Obtener detalle del contacto
     if request.method == 'GET':
@@ -54,13 +56,15 @@ def contact_detail_api_view(request, pk=None):
         return Response(contact_serializer.errors)
     #Eliminar contacto
     elif request.method == 'DELETE':
-        with in_database(db_name):
-            Contact.objects.using(db_name).filter(pk=pk).delete()
-            return Response('Eliminado')
+        # with in_database(db_name):
+        # Contact.objects.using(db_name).filter(pk=pk).delete()
+        Contact.objects.get_contact(pk=pk).first().delete()
+        return Response('Eliminado')
 
 class Contact_Filter_APIView(APIView):
     def get(self, request, *args, **kwargs): 
-        queryset = Contact.objects.using(db_name).all()
+        # queryset = Contact.objects.using(db_name).all()
+        queryset = Contact.objects.get_all_contacts()
 
         code_filter = self.request.query_params.get('code', None)
         email_filter = self.request.query_params.get('email', None)

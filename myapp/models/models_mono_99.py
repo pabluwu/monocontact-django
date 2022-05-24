@@ -206,6 +206,12 @@ class Comment(models.Model):
         managed = False
         db_table = 'comment'
 
+class ContactManager(models.Manager):
+    def get_all_contacts(self):
+        return super().get_queryset().all()
+    
+    def get_contact(self, pk):
+        return super().get_queryset().filter(pk=pk)
 
 class Contact(models.Model):
     code = models.CharField(unique=True, max_length=255, db_collation='utf8_general_ci', blank=True, null=True)
@@ -240,9 +246,13 @@ class Contact(models.Model):
     flag = models.IntegerField()
     fields = models.JSONField(blank=True, null=True)
 
+    objects = ContactManager()
+
     @property
     def account(self):
         return Account.objects.get(pk=self.account_id)
+
+    
 
     class Meta:
         managed = False
@@ -445,6 +455,12 @@ class LeadSkill(models.Model):
         managed = False
         db_table = 'lead_skill'
 
+class ListingManager(models.Manager):
+    def get_all_listing(self):
+        return super().get_queryset().all()
+
+    def get_listing(self, pk):
+        return super().get_queryset().filter(pk=pk)
 
 class Listing(models.Model):
     name = models.CharField(max_length=255)
@@ -456,6 +472,8 @@ class Listing(models.Model):
     invite_subject = models.CharField(max_length=255, blank=True, null=True)
     invite_message = models.TextField(blank=True, null=True)
     flag = models.IntegerField()
+
+    objects = ListingManager()
 
     class Meta:
         managed = False

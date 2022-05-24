@@ -3,21 +3,20 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view  
 
-from dynamic_db_router import in_database
-from myapp.connection import connection_db
+
+
 from myapp.serializers import User_Serializer
 
 from myapp.models.models_mono_99 import UserRole
 from myapp.models.models_mono_base import User, AccountUser
 
 #Selección bd.
-db_name = connection_db(99)
 
 @api_view(['GET'])
 def user_api_view(request, pk=None):
     #Listar todos los contactos.
     try:
-        user_role = UserRole.objects.using(db_name).all()
+        user_role = UserRole.objects.all()
         for u in user_role:
             if u.account_user.user_id == pk:
                 user = User.objects.get(pk=u.account_user.user_id)
