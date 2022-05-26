@@ -9,12 +9,14 @@ from django.contrib.auth.models import AnonymousUser
 
 class CustomAuthentication(BaseAuthentication):
     def authenticate(self, request):
-        try:
-            token = request.META.get('HTTP_AUTHORIZATION', '')
-            stamp = request.META.get('HTTP_STAMP')
-            sig = request.META.get('HTTP_SIG')
-        except:
-            raise exceptions.AuthenticationFailed('Debe ingresar todas las credenciales.')
+        # try:
+        token = request.META.get('HTTP_AUTHORIZATION', '')
+        stamp = request.META.get('HTTP_STAMP')
+        sig = request.META.get('HTTP_SIG')
+        if stamp==None or sig==None or token==None:
+            raise exceptions.AuthenticationFailed('Debe ingresar todas las credenciales.')                
+        # except:
+        #     raise exceptions.AuthenticationFailed('Debe ingresar todas las credenciales.')
         user = AnonymousUser
         #buscar cuenta:
         try:
@@ -23,7 +25,6 @@ class CustomAuthentication(BaseAuthentication):
             concat = token+stamp+secret
         except Account.DoesNotExist:
             raise exceptions.AuthenticationFailed('No such token')
-        
         
         dk = hashlib.sha256()
         dk.update(concat.encode('utf-8'))
