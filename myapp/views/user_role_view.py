@@ -8,7 +8,7 @@ from rest_framework.decorators import api_view
 from myapp.serializers import User_Serializer
 
 from myapp.models.models_mono_99 import UserRole
-from myapp.models.models_mono_base import User, AccountUser
+from mono_base.models import User, AccountUser
 
 #Selección bd.
 

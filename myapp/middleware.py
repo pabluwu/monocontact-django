@@ -1,6 +1,13 @@
+from email import message
+from logging import exception
 from django.db import connections
 import threading
+
+from django.shortcuts import get_object_or_404
 data = threading.local()
+from mono_base.models import Account
+from rest_framework import exceptions
+from rest_framework.response import Response
 class RoutingMiddleware:
 
     def __init__(self, get_response):
@@ -11,8 +18,18 @@ class RoutingMiddleware:
         return response
 
     def process_view(self, request, view_func, args, kwargs):
-        data.account = 99
-        db_name = 'mono_'+str(data.account)
+        token = request.META.get('HTTP_AUTHORIZATION', '')
+        try:
+            acc = Account.objects.get(api_token = token)
+            # acc = get_object_or_404(Account, api_token = token)
+            print(acc.id)
+        except Exception as e:
+            msj = 'Ingrese un token válido o que perteneza a una cuenta'
+            return exceptions.JsonResponse(status=404, data={'status':'false', 'message':msj})
+
+        
+        data.account = acc.id
+        db_name = 'mono_'+str(acc.id)
         connections.databases[db_name]={
         'ENGINE': 'django.db.backends.mysql',
         'NAME': db_name,
@@ -33,7 +50,6 @@ class DatabaseRouter(object):
         if hasattr(data, 'account'):
             return 'mono_'+str(data.account)
         else:
-            
             print(data)
 
     def db_for_read(self, model, **hints):

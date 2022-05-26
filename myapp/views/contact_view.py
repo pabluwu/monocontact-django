@@ -1,16 +1,20 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.decorators import authentication_classes, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view
+from myapp.custom_auth import CustomAuthentication
+
 
 # from myapp.connection import connection_db, select_db
 
 from myapp.models.models_mono_99 import Contact
 from myapp.serializers import ContactSerializer, Contact_Update_Serializer
 
-# db = select_db(10)
-# db_name = connection_db(99)
 
 @api_view(['GET'])
+# @authentication_classes([CustomAuthentication])
+# @permission_classes([IsAuthenticated])
 def contact_api_view(request):
     #Listar todos los contactos.
     if request.method == 'GET':
@@ -18,7 +22,8 @@ def contact_api_view(request):
         contacts = Contact.objects.get_all_contacts()
         contacts_serializer = ContactSerializer(contacts, many=True)
         print(request.META.get('HTTP_AUTHORIZATION', ''))
-        print(request.META.get('HTTP_TEST')) ##Para obtener los headers
+        print(request.META.get('HTTP_SIG')) ##Para obtener los headers
+        print(request.META.get('HTTP_STAMP')) ##Para obtener los headers
         
         return Response(contacts_serializer.data)   
 

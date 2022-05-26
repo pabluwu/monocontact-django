@@ -1,7 +1,7 @@
 from typing import List
 from rest_framework import serializers
-from dynamic_db_router import in_database
-from .models.models_mono_base import User
+
+from mono_base.models import User
 
 from .models.models_mono_99 import Contact, Event, UserRole, AccountUser, Listing
 

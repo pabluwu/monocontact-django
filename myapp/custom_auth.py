@@ -1,27 +1,38 @@
 
-from turtle import st
 from rest_framework.authentication import BaseAuthentication
-from models.models_mono_base import Account
+from rest_framework import exceptions
+
+from mono_base.models import Account
+import hashlib
+
+from django.contrib.auth.models import AnonymousUser
 
 class CustomAuthentication(BaseAuthentication):
     def authenticate(self, request):
-
-        token = request.META.get('HTTP_AUTHORIZATION', '')
-        stamp = request.META.get('HTTP_STAMP')
-        sig = request.META.get('HTTP_SIG')
-        
+        try:
+            token = request.META.get('HTTP_AUTHORIZATION', '')
+            stamp = request.META.get('HTTP_STAMP')
+            sig = request.META.get('HTTP_SIG')
+        except:
+            raise exceptions.AuthenticationFailed('Debe ingresar todas las credenciales.')
+        user = AnonymousUser
         #buscar cuenta:
         try:
-            acc = Account.objects.filter(api_token = token)
-        except:
-            print('no hay cuenta')
+            acc = Account.objects.get(api_token = token)
+            secret = acc.api_secret
+            concat = token+stamp+secret
+        except Account.DoesNotExist:
+            raise exceptions.AuthenticationFailed('No such token')
         
-        secret = acc.api_secret
-
-        if request.META.get('HTTP_Test', ''):
-            print(request.META.get('HTTP_Test', ''))
+        
+        dk = hashlib.sha256()
+        dk.update(concat.encode('utf-8'))
+        
+        if(dk.hexdigest() == sig):
+            user = AnonymousUser
         else:
-            print('nada')
+            user = None
+        return (user, None)
 
 	#   $stamp = $_SERVER['HTTP_X_AUTH_TIMESTAMP'];
 	# 	$token = $_SERVER['HTTP_X_AUTH_TOKEN'];
