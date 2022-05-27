@@ -1,5 +1,3 @@
-from email import message
-from logging import exception
 from django.db import connections
 import threading
 
@@ -7,7 +5,6 @@ from django.shortcuts import get_object_or_404
 data = threading.local()
 from mono_base.models import Account
 from rest_framework import exceptions
-from rest_framework.response import Response
 class RoutingMiddleware:
 
     def __init__(self, get_response):
@@ -63,4 +60,7 @@ class DatabaseRouter(object):
             return self._default_db()
         else: 
             return 'default'
+
+    def allow_relation(self, obj1, obj2, **hints):
+        return True
 

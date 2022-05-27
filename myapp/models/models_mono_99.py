@@ -7,7 +7,7 @@
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
 # from .models_mono_base import Account, Capability, AccountUser
-from mono_base.models import Account, Capability, AccountUser
+from mono_base.models import Account, Capability, AccountUser, User
 
 class Action(models.Model):
     area_id = models.IntegerField(blank=True, null=True)
@@ -218,12 +218,12 @@ class Contact(models.Model):
     code = models.CharField(unique=True, max_length=255, db_collation='utf8_general_ci', blank=True, null=True)
     account_id = models.IntegerField()
     email = models.CharField(max_length=255, db_collation='utf8_general_ci', blank=True, null=True)
-    created_on = models.DateTimeField(blank=True, null=True)
-    created_source = models.IntegerField()
-    created_by = models.IntegerField()
-    updated_on = models.DateTimeField(blank=True, null=True)
-    updated_source = models.IntegerField()
-    updated_by = models.IntegerField()
+    created_on = models.DateTimeField(auto_now_add=True,blank=True)
+    created_source = models.IntegerField(null=True, blank=True)
+    created_by = models.IntegerField(null=True, blank=True)
+    updated_on = models.DateTimeField(auto_now_add=True,blank=True, null=True)
+    updated_source = models.IntegerField(null=True, blank=True)
+    updated_by = models.IntegerField(null=True, blank=True)
     firstname = models.CharField(max_length=255, blank=True, null=True)
     lastname = models.CharField(max_length=255, blank=True, null=True)
     company = models.CharField(max_length=255, blank=True, null=True)
@@ -233,18 +233,18 @@ class Contact(models.Model):
     city = models.CharField(max_length=255, blank=True, null=True)
     region = models.CharField(max_length=255, blank=True, null=True)
     country = models.CharField(max_length=255, blank=True, null=True)
-    is_blacklisted = models.IntegerField()
-    bounced = models.IntegerField()
-    unsubscribed = models.IntegerField()
+    is_blacklisted = models.IntegerField(default=0, blank=True)
+    bounced = models.IntegerField(default=0, blank=True)
+    unsubscribed = models.IntegerField(default=0, blank=True)
     unsubscribed_on = models.DateTimeField(blank=True, null=True)
     unsubscribe_reason = models.IntegerField(blank=True, null=True)
     unsubscribe_reason_text = models.CharField(max_length=255, blank=True, null=True)
-    manually = models.IntegerField()
-    spam = models.IntegerField()
+    manually = models.IntegerField(default=0, blank=True)
+    spam = models.IntegerField(default=0, blank=True)
     token = models.CharField(max_length=255, blank=True, null=True)
-    score = models.IntegerField()
+    score = models.IntegerField(default=0, blank=True)
     comments = models.TextField(blank=True, null=True)
-    flag = models.IntegerField()
+    flag = models.IntegerField(default=0, blank=True)
     fields = models.JSONField(blank=True, null=True)
 
     objects = ContactManager()
@@ -252,8 +252,6 @@ class Contact(models.Model):
     @property
     def account(self):
         return Account.objects.get(pk=self.account_id)
-
-    
 
     class Meta:
         managed = False
@@ -647,18 +645,30 @@ class Status(models.Model):
 
 
 class Subscriber(models.Model):
-    created_on = models.DateTimeField(blank=True, null=True)
-    updated_on = models.DateTimeField(blank=True, null=True)
+    created_on = models.DateTimeField(auto_now_add=True, blank=True)
+    updated_on = models.DateTimeField(auto_now_add=True, blank=True)
     unsubscribed_on = models.DateTimeField(blank=True, null=True)
-    listing = models.ForeignKey(Listing, models.DO_NOTHING)
-    account = models.ForeignKey(Account, models.DO_NOTHING)
-    contact = models.ForeignKey(Contact, models.DO_NOTHING, blank=True, null=True)
+    listing_id = models.IntegerField()
+    account_id = models.IntegerField()
+    contact_id = models.IntegerField()
     bounced = models.IntegerField()
     unsubscribed = models.IntegerField()
     unsubscribe_reason = models.IntegerField(blank=True, null=True)
     unsubscribe_reason_text = models.CharField(max_length=255, blank=True, null=True)
     spam = models.IntegerField()
     manually = models.IntegerField()
+
+    @property
+    def listing(self):
+        return Listing.objects.get(pk=self.listing_id)
+
+    @property
+    def account(self):
+        return Account.objects.get(pk=self.account_id)
+
+    @property
+    def contact(self):
+        return Contact.objects.get(pk=self.contact_id)
 
     class Meta:
         managed = False

@@ -1,15 +1,11 @@
+from multiprocessing import context
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.decorators import authentication_classes, permission_classes
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view
-from myapp.custom_auth import CustomAuthentication
 
-
-# from myapp.connection import connection_db, select_db
-
-from myapp.models.models_mono_99 import Contact
-from myapp.serializers import ContactSerializer, Contact_Update_Serializer
+from myapp.models.models_mono_99 import Contact, Listing
+from myapp.serializers.contact_serializers import ContactSerializer, ContactUpdateSerializer, ContactCreateAPISerializer
+from myapp.serializers.subscribers_serializers import SubscriberCreateApiSerializers
 
 
 @api_view(['GET'])
@@ -33,14 +29,23 @@ def contact_api_view(request):
 def contact_create_api_view(request):
     ##Crear contacto a través de post.
     if request.method == 'POST':
-        contact_serializer = ContactSerializer(data = request.data)
-        # with in_database(db_name):
+        contact_serializer = ContactCreateAPISerializer(data = request.data, context = {'request': request}) #Pasamos request para obtener el token del header en el serializador.
+        #Validación de json a travéz de serializer.
         if contact_serializer.is_valid():
-            contact_serializer.save()
+            #Método .save() retorna el objeto contacto, lo guardamos en una variable para poder crear relación de subscriber.
+            contact = contact_serializer.save() #Guardado de contacto en la bd, para revisar la consulta ir a myapp/serializers/contact_serializer.py/ContactCreateAPISerializer
+            listing = Listing.objects.get(pk=contact_serializer.validated_data.get('listing'))
+            print(contact.account.id)
+            print(contact.id)
+            print(listing.id)
+            contact_serializer = ContactSerializer(contact) #Serializamos con el objeto, este serializador es el mismo que en el listing, y detail.
+            
+            #Relación subscriber (contacto-listing)
+            subscriber_serializer = SubscriberCreateApiSerializers(data={'listing_id': listing.id, 'account_id':contact.account.id, 'contact_id':contact.id})
+            if subscriber_serializer.is_valid():
+                subscriber = subscriber_serializer.save() #Aquí guardamos la relación con subscriber, para más info revisar myapp/serializers/subscriber_serializers.py   
             return Response(contact_serializer.data)
         return Response(contact_serializer.errors)
-
-    
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
@@ -49,12 +54,14 @@ def contact_detail_api_view(request, pk=None):
 
     #Obtener detalle del contacto
     if request.method == 'GET':
-        contact_serializer = ContactSerializer(contact)
-        return Response(contact_serializer.data)
+        if contact != None:
+            contact_serializer = ContactSerializer(contact)
+            return Response(contact_serializer.data)
+        return Response('No hay contacto con ese id')
 
     #Modificar contacto
     elif request.method == 'PUT':
-        contact_serializer = Contact_Update_Serializer(contact, data=request.data)
+        contact_serializer = ContactUpdateSerializer(contact, data=request.data)
         if contact_serializer.is_valid():
             contact_serializer.save()
             return Response(contact_serializer.data)
@@ -70,7 +77,7 @@ class Contact_Filter_APIView(APIView):
     def get(self, request, *args, **kwargs): 
         # queryset = Contact.objects.using(db_name).all()
         queryset = Contact.objects.get_all_contacts()
-
+        #https://youtu.be/UQpxUN0y7QM Idea manual, en el futuro cambiar por libreria si es necesario.
         code_filter = self.request.query_params.get('code', None)
         email_filter = self.request.query_params.get('email', None)
         firstname_filter = self.request.query_params.get('firstname', None)

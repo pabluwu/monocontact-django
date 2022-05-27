@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view
 
 
 
-from myapp.serializers import User_Serializer
+from myapp.serializers.serializers_test import User_Serializer
 
 from myapp.models.models_mono_99 import UserRole
 from mono_base.models import User, AccountUser
