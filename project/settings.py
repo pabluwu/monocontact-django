@@ -41,7 +41,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'rest_framework.authtoken',
-    'myapp.apps.MyappConfig',
+    'myapi.apps.MyapiConfig',
     'mono_base.apps.MonoBaseConfig',
 ]
 
@@ -52,15 +52,19 @@ REST_FRAMEWORK = {
     # ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         # 'rest_framework.authentication.TokenAuthentication',
-        'myapp.custom_auth.CustomAuthentication',  # <-- And here
+        'myapi.custom_auth.CustomAuthentication',  # <-- And here
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
-    ]
+    ],
+    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
+    'DEFAULT_VERSION': 'v1.0',
+    'ALLOWED_VERSIONS': {'v1.0', 'v1.1', 'v1.2'},
+    'VERSION_PARAM': 'version',
 }
 
 MIDDLEWARE = [
-    'myapp.middleware.RoutingMiddleware',
+    'myapi.middleware.RoutingMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -69,6 +73,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+REST_FRAMEWORK
 
 ROOT_URLCONF = 'project.urls'
 
@@ -122,7 +128,7 @@ DATABASES = {
     },
 }
 
-DATABASE_ROUTERS = ['myapp.middleware.DatabaseRouter',]
+DATABASE_ROUTERS = ['myapi.middleware.DatabaseRouter',]
 
 
 # Password validation
